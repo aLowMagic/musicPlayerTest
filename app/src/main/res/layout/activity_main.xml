@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/playButton"
+        android:text=""
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="80dp"
+        android:text="下一首"
+        android:onClick="nextMusic"
+        />
+
+    <ListView
+        android:layout_marginLeft="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="150dp"
+        android:background="#ffffff"
+        android:clickable="true"
+        android:id="@+id/music_list"
+        >
+    </ListView>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:background="#ccccff"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
+            android:text=""
+            android:textSize="28sp"
+            android:textColor="#000000"
+            android:id="@+id/musicName"
+            />
+        <TextView
+            android:layout_width="60dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:text="2:40"
+            android:textSize="20sp"
+            android:textColor="#000000"
+            android:id="@+id/processTime"
+            />
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/processBar"
+            />
+    </LinearLayout>
+
+
+
+</RelativeLayout>
