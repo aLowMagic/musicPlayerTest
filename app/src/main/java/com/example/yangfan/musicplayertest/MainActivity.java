@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 public void run(){
                     while(isRunning){
                         try {
-                            sleep(200);
+                            sleep(250);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             btnPlay.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    intent.putExtra("msgClass", new PauseMusicProcess(musicStatus.getPath().toString(), musicStatus.getMusicName()));
+                    intent.putExtra("msgClass", new PauseMusicProcess(musicStatus.getPath(), musicStatus.getMusicName()));
                     startService(intent);
                 }
             });
@@ -202,12 +202,11 @@ public class MainActivity extends AppCompatActivity {
             btnPlay.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    intent.putExtra("msgClass", new StartMusicProcess(musicStatus.getPath().toString(), musicStatus.getMusicName()));
+                    intent.putExtra("msgClass", new StartMusicProcess(musicStatus.getPath(), musicStatus.getMusicName()));
                     startService(intent);
                 }
             });
         }
-        Log.i("msg Received", musicStatus.getCurrentTime()+"");
         musicNameText.setText(musicStatus.getMusicName());
         processBar.setMax(musicStatus.getDuration());
         musicProcessText.setText(toStringTime(musicStatus.getCurrentTime()));
@@ -258,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
                         new SeekMusicProcess(musicStatus.getPath(), musicStatus.getMusicName(), processBar.getProgress()));
                 startService(intent);
                 isSeeking = false;
-                Log.i("free the seekBar", "~");
             }
         });
     }

@@ -65,13 +65,10 @@ public class MusicPlayerService extends Service {
                         sleep(200);
                         synchronized(player){
                             mrBinder.setPlayStatus(player.isPlaying());
-                            if(player.isPlaying()){
-                                mrBinder.setCurrentTime(player.getCurrentPosition());
-                                mrBinder.setDuration(player.getDuration());
-                            }
+                            mrBinder.setCurrentTime(player.getCurrentPosition());
+                            mrBinder.setDuration(player.getDuration());
                             mrBinder.setMusicName(musicName);
                             mrBinder.setPath(musicPath);
-                            Log.i("send", mrBinder.getCurrentTime()+"");
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
