@@ -1,6 +1,7 @@
 package com.example.yangfan.musicplayertest;
 
 import android.media.MediaPlayer;
+import android.util.Log;
 
 import com.example.yangfan.musicplayertest.MediaProcess;
 
@@ -15,9 +16,15 @@ import java.io.IOException;
 public class InitMusicProcess extends MediaProcess {
     private String path = "";
     private String name = "";
+    private int time = 0;
     public InitMusicProcess(String path, String name){
         this.path = path;
         this.name = name;
+    }
+    public InitMusicProcess(String path, String name, int time){
+        this.path = path;
+        this.name = name;
+        this.time = time;
     }
     @Override
     public String getPath(){
@@ -29,7 +36,13 @@ public class InitMusicProcess extends MediaProcess {
     }
     @Override
     public void process(MediaPlayer player) throws IOException {
-        player.setDataSource(this.path);
-        player.prepare();
+        synchronized (player){
+            player.reset();
+            player.setDataSource(this.path);
+            player.prepare();
+            if(time != 0){
+                player.seekTo(time);
+            }
+        }
     }
 }

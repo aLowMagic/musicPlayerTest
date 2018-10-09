@@ -7,8 +7,8 @@ package com.example.yangfan.musicplayertest;
 public class MusicStatus {
     private boolean isPlaying = false;
     private String musicName = "";
-    private String currentTime = "0.00";
-    private String duration = "0.00";
+    private int currentTime = 0;
+    private int duration = 0;
     private String path = "";
 
     public void setIsPlaying(boolean ip){
@@ -19,16 +19,16 @@ public class MusicStatus {
     public void setMusicName(String str){this.musicName = str;}
     public String getMusicName(){return this.musicName;}
 
-    public void setCurrentTime(String str){this.currentTime=str;}
-    public String getCurrentTime(){return this.currentTime;}
+    public void setCurrentTime(int num){this.currentTime=num;}
+    public int getCurrentTime(){return this.currentTime;}
 
-    public void setDuration(String str){this.duration = str;}
-    public String getDuration(){return this.duration;}
+    public void setDuration(int num){this.duration = num;}
+    public int getDuration(){return this.duration;}
 
     public void setPath(String str){this.path = str;}
     public String getPath(){return this.path;}
 
-    public void setParam(boolean isPlaying, String path, String name, String duration, String currentTime){
+    public void setParam(boolean isPlaying, String path, String name, int duration, int currentTime){
         this.isPlaying = isPlaying;
         this.path = path;
         this.musicName = name;

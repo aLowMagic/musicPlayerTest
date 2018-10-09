@@ -25,9 +25,11 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.text.SimpleDateFormat;
 
 import java.io.File;
 import java.text.DecimalFormat;
+import java.util.TimeZone;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -67,14 +69,17 @@ public class MainActivity extends AppCompatActivity {
         musicListChoice();
         Map initData = getMediaData();
         intent.setClass(this, MusicPlayerService.class);
-        if(initData.get("path")=="" && initData.get("name")==""){
-            //第一次进入程序，需要给mediaplayer一个新文件以刷新mediaplayer的状态
+        if(initData.get("path").equals("") && initData.get("name").equals("")){
             intent.putExtra("msgClass", new InitMusicProcess(musicList.get(currentMusic).toString(), musicList.get(currentMusic).getName()));
-            //后续更新前台状态
+        }
+        else if(!musicStatus.getIsPlaying()){
+            intent.putExtra("msgClass", new InitMusicProcess(initData.get("path").toString(), initData.get("name").toString(), Integer.parseInt(initData.get("currentTime").toString())));
+            refreshCurrentMusic(initData.get("path").toString());
         }
         startService(intent);
         bindService(intent, serviceConnection, Service.BIND_AUTO_CREATE);
         addSeekBarFunc(processBar);
+
     }
 
     @Override
@@ -82,13 +87,14 @@ public class MainActivity extends AppCompatActivity {
         isRunning = false;
         SharedPreferences sp = getSharedPreferences("data.xml", MODE_PRIVATE);
         SharedPreferences.Editor dataEditor = sp.edit();
-        dataEditor.remove("path");
-        dataEditor.remove("name");
+        dataEditor.clear();
         dataEditor.putString("path", musicStatus.getPath());
         dataEditor.putString("name", musicStatus.getMusicName());
-        dataEditor.putString("duration", musicStatus.getDuration());
-        dataEditor.putString("currentTime", musicStatus.getCurrentTime());
+        dataEditor.putInt("duration", musicStatus.getDuration());
+        dataEditor.putInt("currentTime", musicStatus.getCurrentTime());
+        dataEditor.commit();
         unbindService(serviceConnection);
+        stopService(intent);
         super.onDestroy();
     }
 
@@ -102,14 +108,15 @@ public class MainActivity extends AppCompatActivity {
                 public void run(){
                     while(isRunning){
                         try {
-                            sleep(300);
+                            sleep(200);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                musicStatus.setParam(binder.getPlayStatus(), binder.getPath(), binder.getMusicName(), binder.getDuration(), binder.getCurrentTime());
+                                musicStatus.setParam(binder.getPlayStatus(), binder.getPath(), binder.getMusicName(),
+                                 binder.getDuration(), binder.getCurrentTime());
                                 if(!isSeeking){
                                     setUI();
                                 }
@@ -142,13 +149,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void nextMusic(View v){
-        int num = (++currentMusic)%musicList.size();
-        intent.putExtra("msgClass", new NextMusic(musicList.get(num).toString(), musicList.get(num).getName()));
+        currentMusic = (++currentMusic)%musicList.size();
+        intent.putExtra("msgClass", new NextMusic(musicList.get(currentMusic).toString(), musicList.get(currentMusic).getName()));
         startService(intent);
     }
     public void nextMusic(){
-        int num = (++currentMusic)%musicList.size();
-        intent.putExtra("msgClass", new NextMusic(musicList.get(num).toString(), musicList.get(num).getName()));
+        currentMusic = (++currentMusic)%musicList.size();
+        intent.putExtra("msgClass", new NextMusic(musicList.get(currentMusic).toString(), musicList.get(currentMusic).getName()));
         startService(intent);
     }
 
@@ -169,12 +176,13 @@ public class MainActivity extends AppCompatActivity {
 
     public Map getMediaData(){
         SharedPreferences sp = getSharedPreferences("data.xml", MODE_PRIVATE);
-//        SharedPreferences.Editor dataEditor = sp.edit();
-        String loadMusicPath = sp.getString("path", "");
-        String loadMusicName = sp.getString("musicName", "");
-        Map data = new HashMap();
+        String loadMusicPath = sp.getString("path", "default");
+        String loadMusicName = sp.getString("name", "default");
+        String loadMusicCurrentTime = sp.getInt("currentTime", 0)+"";
+        Map<String, String> data = new HashMap<>();
         data.put("path", loadMusicPath);
         data.put("name", loadMusicName);
+        data.put("currentTime", loadMusicCurrentTime);
         return data;
     }
 
@@ -199,10 +207,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+        Log.i("msg Received", musicStatus.getCurrentTime()+"");
         musicNameText.setText(musicStatus.getMusicName());
-        processBar.setMax((int)(Double.parseDouble(musicStatus.getDuration())*60000));
-        musicProcessText.setText(musicStatus.getCurrentTime());
-        processBar.setProgress((int)(Double.parseDouble(musicStatus.getCurrentTime())*60000));
+        processBar.setMax(musicStatus.getDuration());
+        musicProcessText.setText(toStringTime(musicStatus.getCurrentTime()));
+        processBar.setProgress(musicStatus.getCurrentTime());
         adapter.setCurrentMusic(currentMusic);
         adapter.notifyDataSetChanged();
     }
@@ -212,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
         for(int i=0; i<this.musicList.size(); i++){
             MusicInformation item = new MusicInformation();
             item.setMusicName(this.musicList.get(i).getName());
-            //获取作者名函数暂时搁置
             item.setAuthor("");
             item.setPath(this.musicList.get(i).getName());
             viewList.add(item);
@@ -224,25 +232,19 @@ public class MainActivity extends AppCompatActivity {
         musicListTable.setAdapter(adapter);
     }
 
-    public void refreshCurrentMusic(){
-        String path = musicStatus.getPath();
-        Iterator iter = musicList.iterator();
-        int i = 0;
-        while(path != iter.next()){
-            i++;
+    public void refreshCurrentMusic(String currentPath){
+        File file = new File(currentPath);
+        currentMusic = musicList.indexOf(file);
+        if(currentMusic == -1){
+            currentMusic = 0;
         }
-        if(i > musicList.size()){
-            i = 0;
-        }
-        currentMusic = i;
     }
 
     public void addSeekBarFunc(SeekBar bar){
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                DecimalFormat fmt = new DecimalFormat("######0.00");
-                musicProcessText.setText(fmt.format((double)processBar.getProgress()/60000));
+                musicProcessText.setText(toStringTime(processBar.getProgress()));
             }
 
             @Override
@@ -256,6 +258,7 @@ public class MainActivity extends AppCompatActivity {
                         new SeekMusicProcess(musicStatus.getPath(), musicStatus.getMusicName(), processBar.getProgress()));
                 startService(intent);
                 isSeeking = false;
+                Log.i("free the seekBar", "~");
             }
         });
     }
@@ -270,5 +273,12 @@ public class MainActivity extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+    }
+
+    public String toStringTime(int time){
+        SimpleDateFormat  formate = new SimpleDateFormat ("mm:ss");
+        formate.setTimeZone(TimeZone.getTimeZone("GMT+00:00"));
+        String res = formate.format(time);
+        return res;
     }
 }

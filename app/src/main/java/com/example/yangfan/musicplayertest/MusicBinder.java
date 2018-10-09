@@ -9,8 +9,8 @@ import android.os.Binder;
 public class MusicBinder extends Binder {
     private boolean isPlaying = false;
     private boolean needNextMusic = false;
-    private String currentTime = "0.00";
-    private String duration = "0.00";
+    private int currentTime = 0;
+    private int duration = 0;
     private String musicName = "";
     private String path = "";
 
@@ -30,17 +30,17 @@ public class MusicBinder extends Binder {
         this.needNextMusic = need;
     }
 
-    public String getCurrentTime(){
+    public int getCurrentTime(){
         return currentTime;
     }
-    public void setCurrentTime(String time){
+    public void setCurrentTime(int time){
         this.currentTime = time;
     }
 
-    public String getDuration(){
+    public int getDuration(){
         return this.duration;
     }
-    public void setDuration(String time){
+    public void setDuration(int time){
         this.duration = time;
     }
 

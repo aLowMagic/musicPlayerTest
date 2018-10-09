@@ -60,15 +60,19 @@ public class MusicPlayerService extends Service {
         new Thread(){
             @Override
             public void run(){
-                DecimalFormat fmt = new DecimalFormat("######0.00");
                 while(true){
                     try {
                         sleep(200);
-                        mrBinder.setPlayStatus(player.isPlaying());
-                        mrBinder.setCurrentTime(fmt.format((double)player.getCurrentPosition()/60000));
-                        mrBinder.setDuration(fmt.format((double)player.getDuration()/60000));
-                        mrBinder.setMusicName(musicName);
-                        mrBinder.setPath(musicPath);
+                        synchronized(player){
+                            mrBinder.setPlayStatus(player.isPlaying());
+                            if(player.isPlaying()){
+                                mrBinder.setCurrentTime(player.getCurrentPosition());
+                                mrBinder.setDuration(player.getDuration());
+                            }
+                            mrBinder.setMusicName(musicName);
+                            mrBinder.setPath(musicPath);
+                            Log.i("send", mrBinder.getCurrentTime()+"");
+                        }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

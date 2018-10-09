@@ -28,6 +28,8 @@ public class SeekMusicProcess extends MediaProcess {
     }
     @Override
     public void process(MediaPlayer player) throws IOException {
-        player.seekTo(time);
+        synchronized (player){
+            player.seekTo(time);
+        }
     }
 }

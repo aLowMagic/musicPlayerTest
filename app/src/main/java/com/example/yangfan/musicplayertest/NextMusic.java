@@ -23,17 +23,19 @@ public class NextMusic extends MediaProcess {
     }
     @Override
     public void process(MediaPlayer player) throws Exception{
-        if(player.isPlaying()){
-            player.pause();
-        }
-        player.reset();
-        player.setDataSource(this.path);
-        player.prepareAsync();
-        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mediaPlayer) {
-                mediaPlayer.start();
+        synchronized (player){
+            if(player.isPlaying()){
+                player.pause();
             }
-        });
+            player.reset();
+            player.setDataSource(this.path);
+            player.prepareAsync();
+            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                }
+            });
+        }
     }
 }
